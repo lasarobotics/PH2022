@@ -100,7 +100,7 @@ public class DriveSubsystemTest {
   @Test
   @Order(4)
   @DisplayName("Test if robot can turn left")
-  public void turningLeft() {
+  public void turnLeft() {
     // Try to turn left
     m_driveSubsystem.teleop(0.0, 0.0, -1.0);
 
@@ -114,7 +114,7 @@ public class DriveSubsystemTest {
   @Test
   @Order(5)
   @DisplayName("Test if robot can turn right")
-  public void turningRight() {
+  public void turnRight() {
     // Try to turn right
     m_driveSubsystem.teleop(0.0, 0.0, +1.0);
 
@@ -123,5 +123,33 @@ public class DriveSubsystemTest {
     verify(m_rFrontMotor, times(1)).set(AdditionalMatchers.lt(0.0));
     verify(m_lRearMotor, times(1)).set(AdditionalMatchers.gt(0.0));
     verify(m_rRearMotor, times(1)).set(AdditionalMatchers.lt(0.0));
+  }
+
+  @Test
+  @Order(6)
+  @DisplayName("Test if robot can strafe left")
+  public void strafeLeft() {
+    // Try to strafe left
+    m_driveSubsystem.teleop(0.0, -1.0, 0.0);
+
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lFrontMotor, times(1)).set(AdditionalMatchers.lt(0.0));
+    verify(m_rFrontMotor, times(1)).set(AdditionalMatchers.gt(0.0));
+    verify(m_lRearMotor, times(1)).set(AdditionalMatchers.gt(0.0));
+    verify(m_rRearMotor, times(1)).set(AdditionalMatchers.lt(0.0));
+  }
+
+  @Test
+  @Order(7)
+  @DisplayName("Test if robot can strafe right")
+  public void strafeRight() {
+    // Try to strafe right
+    m_driveSubsystem.teleop(0.0, +1.0, 0.0);
+
+    // Verify that left and right motors are being driven with expected values
+    verify(m_lFrontMotor, times(1)).set(AdditionalMatchers.gt(0.0));
+    verify(m_rFrontMotor, times(1)).set(AdditionalMatchers.lt(0.0));
+    verify(m_lRearMotor, times(1)).set(AdditionalMatchers.lt(0.0));
+    verify(m_rRearMotor, times(1)).set(AdditionalMatchers.gt(0.0));
   }
 }

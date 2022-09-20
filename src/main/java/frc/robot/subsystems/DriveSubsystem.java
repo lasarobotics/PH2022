@@ -32,7 +32,14 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   private MecanumDrive m_drivetrain;
 
-  /** Creates a new DriveSubsystem. */
+  /**
+   * Create an instance of DriveSubsystem
+   * <p>
+   * NOTE: ONLY ONE INSTANCE SHOULD EXIST AT ANY TIME!
+   * <p>
+   * @param drivetrainHardware Hardware devices required by drivetrain
+   * @param deadband Deadband for controller input
+   */
   public DriveSubsystem(Hardware drivetrainHardware, double deadband) {
     this.m_lFrontMotor = drivetrainHardware.lFrontMotor;
     this.m_rFrontMotor = drivetrainHardware.rFrontMotor;
@@ -41,9 +48,18 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     this.m_drivetrain = new MecanumDrive(m_lFrontMotor, m_lRearMotor, m_rFrontMotor, m_rRearMotor);
 
+    // Invert right side
+    m_rFrontMotor.setInverted(true);
+    m_rRearMotor.setInverted(true);
+
+    // Set deadband
     m_drivetrain.setDeadband(deadband);
   }
 
+  /**
+   * Initialize hardware devices for drive subsystem
+   * @return hardware object containing all necessary devices for this subsystem
+   */
   public static Hardware initializeHardware() {
     Hardware drivetrainHardware = new Hardware(new CANSparkMax(Constants.FRONT_LEFT_MOTOR_PORT, MotorType.kBrushless),
                                                new CANSparkMax(Constants.FRONT_RIGHT_MOTOR_PORT, MotorType.kBrushless),
