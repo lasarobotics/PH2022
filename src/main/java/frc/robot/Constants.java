@@ -13,8 +13,11 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  // Robot tick rate in seconds
+  public static final double ROBOT_LOOP_PERIOD = 1.0 / 60.0;
+
   // Controller deadband
-  public static final double DEADBAND = 0.02;
+  public static final double CONTROLLER_DEADBAND = 0.02;
   
   // Controller ports
   public static final int PRIMARY_CONTROLLER_PORT = 0;
@@ -24,4 +27,7 @@ public final class Constants {
   public static final int FRONT_RIGHT_MOTOR_PORT = 3;
   public static final int REAR_LEFT_MOTOR_PORT = 4;
   public static final int REAR_RIGHT_MOTOR_PORT = 5;
+
+  // Accessories
+  public static final int BLINKIN_LED_CONTROLLER_PORT = 0;
 }

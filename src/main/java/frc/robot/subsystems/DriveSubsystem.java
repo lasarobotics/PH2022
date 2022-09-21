@@ -4,22 +4,25 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.utils.SparkMax;
 
 public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   public static class Hardware {
-    private CANSparkMax lFrontMotor, rFrontMotor;
-    private CANSparkMax lRearMotor, rRearMotor;
+    private boolean isHardwareReal;
+    private SparkMax lFrontMotor, rFrontMotor;
+    private SparkMax lRearMotor, rRearMotor;
 
-    public Hardware(CANSparkMax lFrontMotor, 
-                    CANSparkMax rFrontMotor, 
-                    CANSparkMax lRearMotor,
-                    CANSparkMax rRearMotor) {
+    public Hardware(boolean isHardwareReal,
+                    SparkMax lFrontMotor, 
+                    SparkMax rFrontMotor, 
+                    SparkMax lRearMotor,
+                    SparkMax rRearMotor) {
+      this.isHardwareReal = isHardwareReal;
       this.lFrontMotor = lFrontMotor;
       this.rFrontMotor = rFrontMotor;
       this.lRearMotor = lRearMotor;
@@ -27,8 +30,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     }
   }
 
-  private CANSparkMax m_lFrontMotor, m_rFrontMotor;
-  private CANSparkMax m_lRearMotor, m_rRearMotor;
+  private SparkMax m_lFrontMotor, m_rFrontMotor;
+  private SparkMax m_lRearMotor, m_rRearMotor;
 
   private MecanumDrive m_drivetrain;
 
@@ -48,6 +51,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     this.m_drivetrain = new MecanumDrive(m_lFrontMotor, m_lRearMotor, m_rFrontMotor, m_rRearMotor);
 
+    // Don't do certain things when unit testing
+    if (!drivetrainHardware.isHardwareReal) {}
+
     // Invert right side
     m_rFrontMotor.setInverted(true);
     m_rRearMotor.setInverted(true);
@@ -58,13 +64,15 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   /**
    * Initialize hardware devices for drive subsystem
+   * @param isHardwareReal True if hardware objects are real, false if unit testing
    * @return hardware object containing all necessary devices for this subsystem
    */
-  public static Hardware initializeHardware() {
-    Hardware drivetrainHardware = new Hardware(new CANSparkMax(Constants.FRONT_LEFT_MOTOR_PORT, MotorType.kBrushless),
-                                               new CANSparkMax(Constants.FRONT_RIGHT_MOTOR_PORT, MotorType.kBrushless),
-                                               new CANSparkMax(Constants.REAR_LEFT_MOTOR_PORT, MotorType.kBrushless),
-                                               new CANSparkMax(Constants.REAR_RIGHT_MOTOR_PORT, MotorType.kBrushless));
+  public static Hardware initializeHardware(boolean isHardwareReal) {
+    Hardware drivetrainHardware = new Hardware(isHardwareReal,
+                                               new SparkMax(Constants.FRONT_LEFT_MOTOR_PORT, MotorType.kBrushless),
+                                               new SparkMax(Constants.FRONT_RIGHT_MOTOR_PORT, MotorType.kBrushless),
+                                               new SparkMax(Constants.REAR_LEFT_MOTOR_PORT, MotorType.kBrushless),
+                                               new SparkMax(Constants.REAR_RIGHT_MOTOR_PORT, MotorType.kBrushless));
     return drivetrainHardware;
   }
 

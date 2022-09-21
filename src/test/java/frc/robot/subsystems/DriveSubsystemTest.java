@@ -17,9 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.AdditionalMatchers;
 
-import com.revrobotics.CANSparkMax;
-
 import frc.robot.Constants;
+import frc.robot.utils.SparkMax;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DriveSubsystemTest {
@@ -28,25 +27,25 @@ public class DriveSubsystemTest {
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
 
-  private CANSparkMax m_lFrontMotor;
-  private CANSparkMax m_rFrontMotor;
-  private CANSparkMax m_lRearMotor;
-  private CANSparkMax m_rRearMotor;
+  private SparkMax m_lFrontMotor;
+  private SparkMax m_rFrontMotor;
+  private SparkMax m_lRearMotor;
+  private SparkMax m_rRearMotor;
 
   @BeforeEach
   public void setup() {
     // Create mock hardware devices
-    m_lFrontMotor = mock(CANSparkMax.class);
-    m_rFrontMotor = mock(CANSparkMax.class);
-    m_lRearMotor = mock(CANSparkMax.class);
-    m_rRearMotor = mock(CANSparkMax.class);
+    m_lFrontMotor = mock(SparkMax.class);
+    m_rFrontMotor = mock(SparkMax.class);
+    m_lRearMotor = mock(SparkMax.class);
+    m_rRearMotor = mock(SparkMax.class);
 
     // Create Hardware object using mock objects
-    m_drivetrainHardware = new DriveSubsystem.Hardware(m_lFrontMotor, m_rFrontMotor, m_lRearMotor, m_rRearMotor);
+    m_drivetrainHardware = new DriveSubsystem.Hardware(false, m_lFrontMotor, m_rFrontMotor, m_lRearMotor, m_rRearMotor);
 
     // Create DriveSubsystem object
     m_driveSubsystem = new DriveSubsystem(m_drivetrainHardware, 
-                                          Constants.DEADBAND);
+                                          Constants.CONTROLLER_DEADBAND);
   }
 
   @AfterEach
