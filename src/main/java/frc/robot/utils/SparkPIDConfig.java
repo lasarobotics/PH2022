@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.MotorFeedbackSensor;
 import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -37,6 +38,37 @@ public class SparkPIDConfig {
   private double m_velocityRPM = 1.0;
   private double m_accelerationRPMPerSec = 1.0;
 
+  private AccelStrategy m_accelStrategy =  AccelStrategy.kTrapezoidal;
+
+   /**
+   * Create a SparkPIDConfig, without Smart Motion parameters
+   * <p>
+   * USE FOR VELOCITY PID ONLY!
+   * @param sensorPhase set sensor phase of encoder
+   * @param invertMotor invert motor or not
+   * @param maxRPM max RPM of encoder
+   * @param ticksPerRotation number of ticks in one encoder revolution
+   * @param kP proportional gain
+   * @param kI integral gain
+   * @param kD derivative gain
+   * @param mechanicalEfficiency mechanical efficiency of mechanism [0.0, +1.0]
+   * @param tolerance tolerance of PID loop in ticks per 100ms
+   */
+  public SparkPIDConfig(boolean sensorPhase, boolean invertMotor, double maxRPM,
+                        double kP, double kI, double kD, double mechanicalEfficiency, double tolerance) {
+    this.m_sensorPhase = sensorPhase;
+    this.m_invertMotor = invertMotor;
+    this.m_maxRPM = maxRPM * mechanicalEfficiency;
+    this.m_kP = kP;
+    this.m_kI = kI;
+    this.m_kD = kD;
+    this.m_tolerance = Math.max(tolerance, MIN_TOLERANCE);
+
+    this.m_enableSoftLimits = false;
+
+    this.m_smartMotion = false;
+  }
+
   /**
    * Create a SparkPIDConfig, with Smart Motion parameters
    * <p>
@@ -50,14 +82,14 @@ public class SparkPIDConfig {
    * @param kD derivative gain
    * @param mechanicalEfficiency mechanical efficiency of mechanism [0.0, +1.0]
    * @param tolerance tolerance of PID loop in ticks
-   * @param velocity MotionMagic cruise velocity in RPM
-   * @param accelerationRPMPerSec MotionMagic acceleration in RPM
-   * @param motionSmoothing MotionMagic smoothing factor [0, 8]
+   * @param velocity Smart Motion cruise velocity in RPM
+   * @param accelerationRPMPerSec Smart Motion acceleration in RPM
+   * @param accelStrategy Smart Motion acceleration strategy
    */
   public SparkPIDConfig(boolean sensorPhase, boolean invertMotor, double maxRPM,
                         double kP, double kI, double kD, double mechanicalEfficiency, double tolerance, 
                         double lowerLimit, double upperLimit, boolean enableSoftLimits,
-                        double velocityRPM, double accelerationRPMPerSec, int motionSmoothing) {
+                        double velocityRPM, double accelerationRPMPerSec, AccelStrategy accelStrategy) {
     this.m_sensorPhase = sensorPhase;
     this.m_invertMotor = invertMotor;
     this.m_maxRPM = maxRPM * MathUtil.clamp(mechanicalEfficiency, 0.0, 1.0);
@@ -72,6 +104,8 @@ public class SparkPIDConfig {
     this.m_velocityRPM = velocityRPM;
     this.m_accelerationRPMPerSec = accelerationRPMPerSec;
 
+    this.m_accelStrategy = accelStrategy;
+
     this.m_smartMotion = true;
   }
 
@@ -82,8 +116,8 @@ public class SparkPIDConfig {
    * @param forwardLimitSwitch Enable forward limit switch
    * @param reverseLimitSwitch Enable reverse limit switch
    */
-  public SparkMaxPIDController initializeSparkPID(CANSparkMax spark, MotorFeedbackSensor feedbackSensor, 
-                                                  boolean forwardLimitSwitch, boolean reverseLimitSwitch) {
+  public void initializeSparkPID(CANSparkMax spark, MotorFeedbackSensor feedbackSensor, 
+                                 boolean forwardLimitSwitch, boolean reverseLimitSwitch) {
     // Reset Spark to default
     spark.restoreFactoryDefaults();
 
@@ -133,9 +167,8 @@ public class SparkPIDConfig {
     if (m_smartMotion) {  
       pidController.setSmartMotionMaxVelocity(m_velocityRPM, PID_SLOT);
       pidController.setSmartMotionMaxAccel(m_accelerationRPMPerSec, PID_SLOT);
+      pidController.setSmartMotionAccelStrategy(m_accelStrategy, PID_SLOT);
     }
-
-    return pidController;
   }
 
   /**
@@ -145,7 +178,7 @@ public class SparkPIDConfig {
    * @param spark Spark motor controller to apply settings to
    * @param feedbackSensor Feedback device to use for Spark PID
    */
-  public SparkMaxPIDController initializeSparkPID(CANSparkMax spark, MotorFeedbackSensor feedbackSensor) {
-    return initializeSparkPID(spark, feedbackSensor, false, false);
+  public void initializeSparkPID(CANSparkMax spark, MotorFeedbackSensor feedbackSensor) {
+    initializeSparkPID(spark, feedbackSensor, false, false);
   }
 }
