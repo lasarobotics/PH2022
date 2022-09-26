@@ -71,12 +71,19 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     this.m_drivetrain = new MecanumDrive(m_lFrontMotor, m_lRearMotor, m_rFrontMotor, m_rRearMotor);
 
-    // Calibrate and reset NAVX
-    m_navx.calibrate();
-    resetAngle();
-
-    // Don't do certain things when unit testing
-    if (!drivetrainHardware.isHardwareReal) {}
+    // Only do this stuff if hardware is real
+    if (drivetrainHardware.isHardwareReal) {
+      // Set position and velocity conversion factor
+      double conversionFactor = (wheelDiameter * Math.PI) / gearRatio;
+      m_lFrontMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+      m_rFrontMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+      m_lRearMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+      m_rRearMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+      m_lFrontMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+      m_rFrontMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+      m_lRearMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+      m_rRearMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+    }
 
     // Invert right side
     m_rFrontMotor.setInverted(true);
@@ -85,23 +92,16 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Set deadband
     m_drivetrain.setDeadband(deadband);
 
-    // Set position and velocity conversion factor
-    double conversionFactor = (wheelDiameter * Math.PI) / gearRatio;
-    m_lFrontMotor.getEncoder().setPositionConversionFactor(conversionFactor);
-    m_rFrontMotor.getEncoder().setPositionConversionFactor(conversionFactor);
-    m_lRearMotor.getEncoder().setPositionConversionFactor(conversionFactor);
-    m_rRearMotor.getEncoder().setPositionConversionFactor(conversionFactor);
-    m_lFrontMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
-    m_rFrontMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
-    m_lRearMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
-    m_rRearMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
-
     MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(+wheelbase / 2.0, +trackWidth / 2.0), 
                                                                    new Translation2d(+wheelbase / 2.0, -trackWidth / 2.0),
                                                                    new Translation2d(-wheelbase / 2.0, +trackWidth / 2.0),
                                                                    new Translation2d(-wheelbase / 2.0, -trackWidth / 2.0));
 
-    m_odometry = new MecanumDriveOdometry(kinematics, m_navx.getRotation2d());
+    // Calibrate and reset NAVX
+    m_navx.calibrate();
+    resetAngle();
+
+    m_odometry = new MecanumDriveOdometry(kinematics, new Rotation2d());
   }
 
   /**
