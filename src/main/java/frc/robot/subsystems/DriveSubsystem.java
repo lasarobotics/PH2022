@@ -4,8 +4,18 @@
 
 package frc.robot.subsystems;
 
+import java.time.Instant;
+
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -16,24 +26,29 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     private boolean isHardwareReal;
     private SparkMax lFrontMotor, rFrontMotor;
     private SparkMax lRearMotor, rRearMotor;
+    private AHRS navx;
 
     public Hardware(boolean isHardwareReal,
                     SparkMax lFrontMotor, 
                     SparkMax rFrontMotor, 
                     SparkMax lRearMotor,
-                    SparkMax rRearMotor) {
+                    SparkMax rRearMotor,
+                    AHRS navx) {
       this.isHardwareReal = isHardwareReal;
       this.lFrontMotor = lFrontMotor;
       this.rFrontMotor = rFrontMotor;
       this.lRearMotor = lRearMotor;
       this.rRearMotor = rRearMotor;
+      this.navx = navx;
     }
   }
 
   private SparkMax m_lFrontMotor, m_rFrontMotor;
   private SparkMax m_lRearMotor, m_rRearMotor;
+  private AHRS m_navx;
 
   private MecanumDrive m_drivetrain;
+  private MecanumDriveOdometry m_odometry;
 
   /**
    * Create an instance of DriveSubsystem
@@ -42,14 +57,23 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * <p>
    * @param drivetrainHardware Hardware devices required by drivetrain
    * @param deadband Deadband for controller input
+   * @param gearRatio Drive gear ratio
+   * @param wheelDiameter Diameter of drivetrain wheels in meters
+   * @param trackWidth Track width of robot in meters
+   * @param wheelbase Wheelbase of robot in meters
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double deadband) {
+  public DriveSubsystem(Hardware drivetrainHardware, double deadband, double gearRatio, double wheelDiameter, double trackWidth, double wheelbase) {
     this.m_lFrontMotor = drivetrainHardware.lFrontMotor;
     this.m_rFrontMotor = drivetrainHardware.rFrontMotor;
     this.m_lRearMotor = drivetrainHardware.lRearMotor;
     this.m_rRearMotor = drivetrainHardware.rRearMotor;
+    this.m_navx = drivetrainHardware.navx;
 
     this.m_drivetrain = new MecanumDrive(m_lFrontMotor, m_lRearMotor, m_rFrontMotor, m_rRearMotor);
+
+    // Calibrate and reset NAVX
+    m_navx.calibrate();
+    resetAngle();
 
     // Don't do certain things when unit testing
     if (!drivetrainHardware.isHardwareReal) {}
@@ -60,6 +84,24 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Set deadband
     m_drivetrain.setDeadband(deadband);
+
+    // Set position and velocity conversion factor
+    double conversionFactor = (wheelDiameter * Math.PI) / gearRatio;
+    m_lFrontMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+    m_rFrontMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+    m_lRearMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+    m_rRearMotor.getEncoder().setPositionConversionFactor(conversionFactor);
+    m_lFrontMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+    m_rFrontMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+    m_lRearMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+    m_rRearMotor.getEncoder().setVelocityConversionFactor(conversionFactor);
+
+    MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(+wheelbase / 2.0, +trackWidth / 2.0), 
+                                                                   new Translation2d(+wheelbase / 2.0, -trackWidth / 2.0),
+                                                                   new Translation2d(-wheelbase / 2.0, +trackWidth / 2.0),
+                                                                   new Translation2d(-wheelbase / 2.0, -trackWidth / 2.0));
+
+    m_odometry = new MecanumDriveOdometry(kinematics, m_navx.getRotation2d());
   }
 
   /**
@@ -72,8 +114,23 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
                                                new SparkMax(Constants.FRONT_LEFT_MOTOR_PORT, MotorType.kBrushless),
                                                new SparkMax(Constants.FRONT_RIGHT_MOTOR_PORT, MotorType.kBrushless),
                                                new SparkMax(Constants.REAR_LEFT_MOTOR_PORT, MotorType.kBrushless),
-                                               new SparkMax(Constants.REAR_RIGHT_MOTOR_PORT, MotorType.kBrushless));
+                                               new SparkMax(Constants.REAR_RIGHT_MOTOR_PORT, MotorType.kBrushless),
+                                               new AHRS(SPI.Port.kMXP));
     return drivetrainHardware;
+  }
+
+  /**
+   * Reset NAVX angle
+   */
+  private void resetAngle() {
+    m_navx.reset();
+  }
+
+  private void resetEncoders() {
+    m_lFrontMotor.getEncoder().setPosition(0.0);
+    m_rFrontMotor.getEncoder().setPosition(0.0);
+    m_lRearMotor.getEncoder().setPosition(0.0);
+    m_rRearMotor.getEncoder().setPosition(0.0);
   }
 
   @Override
@@ -89,6 +146,63 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public void teleop(double ySpeed, double xSpeed, double zRotation) {
     m_drivetrain.driveCartesian(ySpeed, xSpeed, zRotation);
+  }
+
+  /**
+   * Get orientation of robot
+   * @return angle in degrees
+   */
+  public double getAngle() {
+    return m_navx.getAngle();
+  }
+
+  /**
+   * Get oriantation of robot
+   * @return angle as Rotation2d object
+   */
+  public Rotation2d getRotation2d() {
+    return m_navx.getRotation2d();
+  }
+
+  /**
+   * Obtain current linear wheel speeds of the robot
+   * @return Current wheel speeds
+   */
+  public MecanumDriveWheelSpeeds getWheelSpeeds() {
+    MecanumDriveWheelSpeeds wheelSpeeds = new MecanumDriveWheelSpeeds(m_lFrontMotor.getEncoder().getVelocity(),
+                                                                      m_rFrontMotor.getEncoder().getVelocity(),
+                                                                      m_lRearMotor.getEncoder().getVelocity(),
+                                                                      m_rRearMotor.getEncoder().getVelocity());
+    return wheelSpeeds;
+  }
+
+  /**
+   * Reset drive subsystem odometry
+   * @param pose pose to reset to
+   */
+  public void resetOdometry(Pose2d pose) {
+    resetAngle();
+    resetEncoders();
+    m_odometry.resetPosition(pose, getRotation2d());
+  }
+
+  /**
+   * Update robot odometry
+   * <p>
+   * Repeatedly call this method to keep track of robot's position
+   */
+  public void updateOdometry() {
+    m_odometry.updateWithTime(Instant.now().getEpochSecond(), getRotation2d(), getWheelSpeeds());
+  }
+
+  /**
+   * Obtain currently estimated pose of the robot
+   * <p>
+   * This method is periodically called by the Ramsete command to obtain the latest pose
+   * @return latest robot pose
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
   }
 
   @Override

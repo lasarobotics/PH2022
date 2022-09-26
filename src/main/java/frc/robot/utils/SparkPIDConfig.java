@@ -174,11 +174,88 @@ public class SparkPIDConfig {
   /**
    * Initializes Spark PID and Smart Motion parameters
    * <p>
-   * Calls {@link TalonPIDConfig#initializeTalonPID(CANSparkMax, FeedbackDevice, boolean, boolean)} with no limit switches 
+   * Calls {@link SparkPIDConfig#initializeSparkPID(CANSparkMax, FeedbackDevice, boolean, boolean)} with no limit switches 
    * @param spark Spark motor controller to apply settings to
    * @param feedbackSensor Feedback device to use for Spark PID
    */
   public void initializeSparkPID(CANSparkMax spark, MotorFeedbackSensor feedbackSensor) {
     initializeSparkPID(spark, feedbackSensor, false, false);
+  }
+
+  /**
+   * @return Sensor phase
+   */
+  public boolean getSensorPhase() {
+    return m_sensorPhase;
+  }
+
+  /**
+   * @return Whether motor is inverted or not
+   */
+  public boolean getInvertMotor() {
+    return m_invertMotor;
+  }
+
+  /**
+   * @return Proportional gain
+   */
+  public double getkP() {
+    return m_kP;
+  }
+
+  /**
+   * @return Integral gain
+   */
+  public double getkI() {
+    return m_kI;
+  }
+
+  /**
+   * @return Derivative gain
+   */
+  public double getkD() {
+    return m_kD;
+  }
+
+  /**
+   * @return Feed-forward gain
+   */
+  public double getkF() {
+    return m_kF;
+  }
+
+  /**
+   * @return PID loop tolerance
+   */
+  public double getTolerance() {
+    return m_tolerance;
+  }
+
+  /**
+   * @return Lower limit of mechanism
+   */
+  public double getLowerLimit() {
+    return m_lowerLimit;
+  }
+
+  /**
+   * @return Upper limit of mechanism
+   */
+  public double getUpperLimit() {
+    return m_upperLimit;
+  }
+
+  /**
+   * @return MotionMagic cruise velocity in RPM
+   */
+  public double getVelocityRPM() {
+    return m_velocityRPM;
+  }
+
+  /**
+   * @return MotionMagic acceleration in RPM per sec
+   */
+  public double getAccelerationRPMPerSec() {
+    return m_accelerationRPMPerSec;
   }
 }

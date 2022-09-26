@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.AdditionalMatchers;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import frc.robot.Constants;
 import frc.robot.utils.SparkMax;
 
@@ -24,6 +26,7 @@ import frc.robot.utils.SparkMax;
 public class DriveSubsystemTest {
 
   private final double DELTA = 1e-3;
+  private final boolean MOCK_HARDWARE = false;
   private DriveSubsystem m_driveSubsystem;
   private DriveSubsystem.Hardware m_drivetrainHardware;
 
@@ -31,6 +34,7 @@ public class DriveSubsystemTest {
   private SparkMax m_rFrontMotor;
   private SparkMax m_lRearMotor;
   private SparkMax m_rRearMotor;
+  private AHRS m_navx;
 
   @BeforeEach
   public void setup() {
@@ -39,13 +43,18 @@ public class DriveSubsystemTest {
     m_rFrontMotor = mock(SparkMax.class);
     m_lRearMotor = mock(SparkMax.class);
     m_rRearMotor = mock(SparkMax.class);
+    m_navx = mock(AHRS.class);
 
     // Create Hardware object using mock objects
-    m_drivetrainHardware = new DriveSubsystem.Hardware(false, m_lFrontMotor, m_rFrontMotor, m_lRearMotor, m_rRearMotor);
+    m_drivetrainHardware = new DriveSubsystem.Hardware(MOCK_HARDWARE, m_lFrontMotor, m_rFrontMotor, m_lRearMotor, m_rRearMotor, m_navx);
 
     // Create DriveSubsystem object
     m_driveSubsystem = new DriveSubsystem(m_drivetrainHardware, 
-                                          Constants.CONTROLLER_DEADBAND);
+                                          Constants.CONTROLLER_DEADBAND,
+                                          Constants.DRIVE_GEAR_RATIO,
+                                          Constants.DRIVE_WHEEL_DIAMETER_METERS,
+                                          Constants.WHEELBASE,
+                                          Constants.TRACK_WIDTH);
   }
 
   @AfterEach

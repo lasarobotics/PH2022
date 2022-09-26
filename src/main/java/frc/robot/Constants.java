@@ -18,6 +18,12 @@ public final class Constants {
 
   // Controller deadband
   public static final double CONTROLLER_DEADBAND = 0.02;
+
+  // Drive specs
+  public static final double WHEELBASE = 1.0;
+  public static final double TRACK_WIDTH = 1.0;
+  public static final double DRIVE_WHEEL_DIAMETER_METERS = 0.1524;
+  public static final double DRIVE_GEAR_RATIO = 1.0;
   
   // Controller ports
   public static final int PRIMARY_CONTROLLER_PORT = 0;

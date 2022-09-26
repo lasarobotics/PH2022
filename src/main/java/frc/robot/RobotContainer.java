@@ -17,9 +17,15 @@ import frc.robot.subsystems.DriveSubsystem;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final boolean REAL_HARDWARE = true;
+  
   // The robot's subsystems and commands are defined here...
-  private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(true),
-                                                                           Constants.CONTROLLER_DEADBAND);
+  private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(REAL_HARDWARE),
+                                                                           Constants.CONTROLLER_DEADBAND,
+                                                                           Constants.DRIVE_GEAR_RATIO,
+                                                                           Constants.DRIVE_WHEEL_DIAMETER_METERS,
+                                                                           Constants.WHEELBASE,
+                                                                           Constants.TRACK_WIDTH);
 
   private static final XboxController PRIMARY_CONTROLLER = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
 
@@ -43,6 +49,13 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {}
+
+  /**
+   * Do this during autonomous
+   */
+  public void autonomousPeriodic() {
+    DRIVE_SUBSYSTEM.updateOdometry();
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
