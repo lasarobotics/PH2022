@@ -36,4 +36,15 @@ public final class Constants {
 
   // Accessories
   public static final int BLINKIN_LED_CONTROLLER_PORT = 0;
+
+  // Lift motor ports
+  public static final int LIFT_LEFT_MOTOR_PORT = 6;
+  public static final int LIFT_RIGHT_MOTOR_PORT = 6;
+  public static final int LIFT_TILT_MOTOR_PORT = 6;
+  
+  // Lift motor limits
+  public static final double LIFT_LOWER_POSITION_LIMIT = 0.0;
+  public static final double LIFT_UPPER_POSITION_LIMIT = 1.0;
+  public static final double LIFT_WINCH_OUT_LIMIT = 1.0;
+  public static final double LIFT_WINCH_IN_LIMIT = 0.0;
 }
