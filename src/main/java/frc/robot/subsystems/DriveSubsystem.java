@@ -155,7 +155,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   /**
-   * Get oriantation of robot
+   * Get orientation of robot
    * @return angle as Rotation2d object
    */
   public Rotation2d getRotation2d() {

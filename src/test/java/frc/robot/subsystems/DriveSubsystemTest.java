@@ -79,7 +79,7 @@ public class DriveSubsystemTest {
 
   @Test
   @Order(2)
-  @DisplayName("Test if robot can move forward")
+  @DisplayName("Test if robot can move in reverse")
   public void reverse() {
     // Try to drive in reverse
     m_driveSubsystem.teleop(-1.0, 0.0, 0.0);
