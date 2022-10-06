@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.time.Instant;
-
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -48,6 +46,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private AHRS m_navx;
 
   private MecanumDrive m_drivetrain;
+  private MecanumDriveKinematics m_kinematics;
   private MecanumDriveOdometry m_odometry;
 
   /**
@@ -92,16 +91,15 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     // Set deadband
     m_drivetrain.setDeadband(deadband);
 
-    MecanumDriveKinematics kinematics = new MecanumDriveKinematics(new Translation2d(+wheelbase / 2.0, +trackWidth / 2.0), 
-                                                                   new Translation2d(+wheelbase / 2.0, -trackWidth / 2.0),
-                                                                   new Translation2d(-wheelbase / 2.0, +trackWidth / 2.0),
-                                                                   new Translation2d(-wheelbase / 2.0, -trackWidth / 2.0));
+    m_kinematics = new MecanumDriveKinematics(new Translation2d(+wheelbase / 2.0, +trackWidth / 2.0), 
+                                              new Translation2d(+wheelbase / 2.0, -trackWidth / 2.0),
+                                              new Translation2d(-wheelbase / 2.0, +trackWidth / 2.0),
+                                              new Translation2d(-wheelbase / 2.0, -trackWidth / 2.0));
 
-    // Calibrate and reset NAVX
+    // Calibrate NAVX
     m_navx.calibrate();
-    resetAngle();
 
-    m_odometry = new MecanumDriveOdometry(kinematics, new Rotation2d());
+    m_odometry = new MecanumDriveOdometry(m_kinematics, new Rotation2d());
   }
 
   /**
@@ -192,7 +190,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * Repeatedly call this method to keep track of robot's position
    */
   public void updateOdometry() {
-    m_odometry.updateWithTime(Instant.now().getEpochSecond(), getRotation2d(), getWheelSpeeds());
+    m_odometry.update(getRotation2d(), getWheelSpeeds());
   }
 
   /**
@@ -203,6 +201,14 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
+  }
+
+  /**
+   * Get kinematics of drivetrain
+   * @return Object with robot kinematics
+   */
+  public MecanumDriveKinematics getKinematics() {
+    return m_kinematics;
   }
 
   @Override

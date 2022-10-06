@@ -17,7 +17,7 @@ public final class Constants {
   public static final double ROBOT_LOOP_PERIOD = 1.0 / 60.0;
 
   // Controller deadband
-  public static final double CONTROLLER_DEADBAND = 0.02;
+  public static final double CONTROLLER_DEADBAND = 0.15;
 
   // Drive specs
   public static final double WHEELBASE = 1.0;
@@ -29,10 +29,10 @@ public final class Constants {
   public static final int PRIMARY_CONTROLLER_PORT = 0;
 
   // Drive motor ports
-  public static final int FRONT_LEFT_MOTOR_PORT = 2;
+  public static final int FRONT_LEFT_MOTOR_PORT = 11;
   public static final int FRONT_RIGHT_MOTOR_PORT = 3;
-  public static final int REAR_LEFT_MOTOR_PORT = 4;
-  public static final int REAR_RIGHT_MOTOR_PORT = 5;
+  public static final int REAR_LEFT_MOTOR_PORT = 5;
+  public static final int REAR_RIGHT_MOTOR_PORT = 9;
 
   // Accessories
   public static final int BLINKIN_LED_CONTROLLER_PORT = 0;
