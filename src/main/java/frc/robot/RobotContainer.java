@@ -36,7 +36,7 @@ public class RobotContainer {
 
     DRIVE_SUBSYSTEM.setDefaultCommand(
       new RunCommand(
-        () -> DRIVE_SUBSYSTEM.teleop(PRIMARY_CONTROLLER.getLeftY(), PRIMARY_CONTROLLER.getLeftX(), PRIMARY_CONTROLLER.getRightX()), 
+        () -> DRIVE_SUBSYSTEM.teleop(PRIMARY_CONTROLLER.getLeftY(), 0.0, PRIMARY_CONTROLLER.getRightX()), 
         DRIVE_SUBSYSTEM
       )
     );
