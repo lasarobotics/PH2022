@@ -20,7 +20,7 @@ public final class Constants {
   public static final double ROBOT_LOOP_PERIOD = 1.0 / 60.0;
 
   // Controller deadband
-  public static final double CONTROLLER_DEADBAND = 0.25;
+  public static final double CONTROLLER_DEADBAND = 0.15;
 
   // Spline interpolator
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
