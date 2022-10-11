@@ -34,11 +34,11 @@ public final class Constants {
   public static final double WHEELBASE = 1.0;
   public static final double DRIVE_WHEEL_DIAMETER_METERS = 0.1524;
   public static final double DRIVE_GEAR_RATIO = 4608.0 / 450.0;
-  public static final double DRIVE_TICKS_PER_METER = (REV_NEO_ENCODER_TICKS_PER_ROTATION * DRIVE_GEAR_RATIO) * (1 / (DRIVE_WHEEL_DIAMETER_METERS * Math.PI)); // 48997.324
+  public static final double DRIVE_TICKS_PER_METER = (REV_NEO_ENCODER_TICKS_PER_ROTATION * DRIVE_GEAR_RATIO) * (1 / (DRIVE_WHEEL_DIAMETER_METERS * Math.PI)); // 898.285
   public static final double DRIVE_METERS_PER_TICK = 1 / DRIVE_TICKS_PER_METER; // 2.041e-5
-  public static final double DRIVE_METERS_PER_ROTATION = DRIVE_METERS_PER_TICK * REV_NEO_ENCODER_TICKS_PER_ROTATION; // 0.041798
+  public static final double DRIVE_METERS_PER_ROTATION = DRIVE_METERS_PER_TICK * REV_NEO_ENCODER_TICKS_PER_ROTATION; // 0.046755
   public static final double DRIVETRAIN_EFFICIENCY = 0.85;
-  public static final double DRIVE_MAX_LINEAR_SPEED = (NEO_MAX_RPM / 60) * DRIVE_METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY; // 3.766 m/s
+  public static final double DRIVE_MAX_LINEAR_SPEED = (NEO_MAX_RPM / 60) * DRIVE_METERS_PER_ROTATION * DRIVETRAIN_EFFICIENCY; // 3.895 m/s
 
   // Drive PID values
   public static final double DRIVE_kP = 0.015;
