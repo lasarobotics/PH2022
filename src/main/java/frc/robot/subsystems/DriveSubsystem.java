@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -55,6 +56,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private MecanumDrive m_drivetrain;
   private MecanumDriveKinematics m_kinematics;
   private MecanumDriveOdometry m_odometry;
+
+  private final double TOLERANCE = 0.125;
+  private final double MAX_VOLTAGE = 12.0;
 
   /**
    * Create an instance of DriveSubsystem
@@ -107,6 +111,18 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     m_rFrontMotor.setInverted(true);
     m_rRearMotor.setInverted(true);
 
+    // Enable voltage compensation
+    m_lFrontMotor.enableVoltageCompensation(MAX_VOLTAGE);
+    m_rFrontMotor.enableVoltageCompensation(MAX_VOLTAGE);
+    m_lRearMotor.enableVoltageCompensation(MAX_VOLTAGE);
+    m_rRearMotor.enableVoltageCompensation(MAX_VOLTAGE);
+
+    // Set all motors to brake mode
+    m_lFrontMotor.setIdleMode(IdleMode.kBrake);
+    m_rFrontMotor.setIdleMode(IdleMode.kBrake);
+    m_lRearMotor.setIdleMode(IdleMode.kBrake);
+    m_rRearMotor.setIdleMode(IdleMode.kBrake);
+
     // Set deadband
     m_drivetrain.setDeadband(deadband);
 
@@ -115,10 +131,11 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
                                               new Translation2d(-wheelbase / 2.0, +trackWidth / 2.0),
                                               new Translation2d(-wheelbase / 2.0, -trackWidth / 2.0));
 
-    // Calibrate NAVX
+    // Calibrate NAVX and initialize PID setpoint
     m_navx.calibrate();
-
+    resetAngle();
     m_turnPIDController.setSetpoint(0.0);
+    m_turnPIDController.setTolerance(TOLERANCE);
 
     m_odometry = new MecanumDriveOdometry(m_kinematics, new Rotation2d());
   }
