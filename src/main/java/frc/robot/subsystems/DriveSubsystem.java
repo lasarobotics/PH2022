@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -18,6 +20,8 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.utils.SparkMax;
+import frc.robot.utils.TractionControlController;
+import frc.robot.utils.TurnPIDController;
 
 public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   public static class Hardware {
@@ -45,6 +49,9 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private SparkMax m_lRearMotor, m_rRearMotor;
   private AHRS m_navx;
 
+  private TurnPIDController m_turnPIDController;
+  private TractionControlController m_tractionControlController;
+
   private MecanumDrive m_drivetrain;
   private MecanumDriveKinematics m_kinematics;
   private MecanumDriveOdometry m_odometry;
@@ -55,13 +62,25 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    * NOTE: ONLY ONE INSTANCE SHOULD EXIST AT ANY TIME!
    * <p>
    * @param drivetrainHardware Hardware devices required by drivetrain
-   * @param deadband Deadband for controller input
-   * @param gearRatio Drive gear ratio
-   * @param wheelDiameter Diameter of drivetrain wheels in meters
+   * @param gearRatio Gear ratio between motor and drive wheels
+   * @param wheelDiameter Wheel diameter in meters
    * @param trackWidth Track width of robot in meters
    * @param wheelbase Wheelbase of robot in meters
+   * @param kP Proportional gain
+   * @param kD Derivative gain
+   * @param turnScalar Scalar for turn input (degrees)
+   * @param deadband Deadband for controller input
+   * @param lookAhead Turn PID lookahead, in number of loops
+  * @param tractionControlCurve Spline function characterising traction of the robot
+   * @param throttleInputCurve Spline function characterising throttle input
+   * @param turnInputCurve Spline function characterising turn input
    */
-  public DriveSubsystem(Hardware drivetrainHardware, double deadband, double gearRatio, double wheelDiameter, double trackWidth, double wheelbase) {
+  public DriveSubsystem(Hardware drivetrainHardware, double gearRatio, double wheelDiameter, double trackWidth, double wheelbase,
+                        double kP, double kD, double turnScalar, double deadband, double lookAhead, 
+                        PolynomialSplineFunction tractionControlCurve, PolynomialSplineFunction throttleInputCurve, PolynomialSplineFunction turnInputCurve) {
+    m_turnPIDController = new TurnPIDController(kP, kD, turnScalar, deadband, lookAhead, turnInputCurve);
+    m_tractionControlController = new TractionControlController(deadband, tractionControlCurve.getKnots()[tractionControlCurve.getN()], tractionControlCurve, throttleInputCurve);
+
     this.m_lFrontMotor = drivetrainHardware.lFrontMotor;
     this.m_rFrontMotor = drivetrainHardware.rFrontMotor;
     this.m_lRearMotor = drivetrainHardware.lRearMotor;
@@ -98,6 +117,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     // Calibrate NAVX
     m_navx.calibrate();
+
+    m_turnPIDController.setSetpoint(0.0);
 
     m_odometry = new MecanumDriveOdometry(m_kinematics, new Rotation2d());
   }
@@ -147,6 +168,22 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   /**
+   * Call this repeatedly to drive using PID during teleoperation
+   * @param speedRequest Desired speed [-1.0, +1.0]
+   * @param turnRequest Turn input [-1.0, +1.0]
+   */
+  public void teleopPID(double yRequest, double zRequest) {
+    // Calculate next speed output
+    double yOutput = m_tractionControlController.calculate(getInertialVelocity(), yRequest);
+
+    // Calculate next PID turn output
+    double zOutput = m_turnPIDController.calculate(getAngle(), getTurnRate(), zRequest);
+
+    // Run motors with appropriate values
+    m_drivetrain.driveCartesian(yOutput, 0.0, zOutput);
+  }
+
+  /**
    * Get orientation of robot
    * @return angle in degrees
    */
@@ -160,6 +197,22 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
    */
   public Rotation2d getRotation2d() {
     return m_navx.getRotation2d();
+  }
+
+  /**
+   * Returns the turn rate of the robot.
+   * @return The turn rate of the robot, in degrees per second
+   */
+  public double getTurnRate() {
+    return m_navx.getRate();
+  }
+
+  /**
+   * Returns inertial velocity of the robot.
+   * @return Velocity of the robot as measured by the NAVX
+   */
+  public double getInertialVelocity() {
+    return m_navx.getVelocityY();
   }
 
   /**

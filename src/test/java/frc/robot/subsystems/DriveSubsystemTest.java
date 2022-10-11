@@ -50,11 +50,18 @@ public class DriveSubsystemTest {
 
     // Create DriveSubsystem object
     m_driveSubsystem = new DriveSubsystem(m_drivetrainHardware, 
-                                          Constants.CONTROLLER_DEADBAND,
-                                          Constants.DRIVE_GEAR_RATIO,
+                                          Constants.DRIVE_GEAR_RATIO, 
                                           Constants.DRIVE_WHEEL_DIAMETER_METERS,
+                                          Constants.TRACK_WIDTH, 
                                           Constants.WHEELBASE,
-                                          Constants.TRACK_WIDTH);
+                                          Constants.DRIVE_kP,
+                                          Constants.DRIVE_kD,
+                                          Constants.DRIVE_TURN_SCALAR,
+                                          Constants.CONTROLLER_DEADBAND,
+                                          Constants.DRIVE_LOOKAHEAD,
+                                          Constants.DRIVE_TRACTION_CONTROL_CURVE,
+                                          Constants.DRIVE_THROTTLE_INPUT_CURVE,
+                                          Constants.DRIVE_TURN_INPUT_CURVE);
   }
 
   @AfterEach

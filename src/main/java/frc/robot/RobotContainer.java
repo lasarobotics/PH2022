@@ -20,12 +20,19 @@ public class RobotContainer {
   private static final boolean REAL_HARDWARE = true;
   
   // The robot's subsystems and commands are defined here...
-  private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(REAL_HARDWARE),
-                                                                           Constants.CONTROLLER_DEADBAND,
-                                                                           Constants.DRIVE_GEAR_RATIO,
+  private static final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initializeHardware(REAL_HARDWARE), 
+                                                                           Constants.DRIVE_GEAR_RATIO, 
                                                                            Constants.DRIVE_WHEEL_DIAMETER_METERS,
+                                                                           Constants.TRACK_WIDTH, 
                                                                            Constants.WHEELBASE,
-                                                                           Constants.TRACK_WIDTH);
+                                                                           Constants.DRIVE_kP,
+                                                                           Constants.DRIVE_kD,
+                                                                           Constants.DRIVE_TURN_SCALAR,
+                                                                           Constants.CONTROLLER_DEADBAND,
+                                                                           Constants.DRIVE_LOOKAHEAD,
+                                                                           Constants.DRIVE_TRACTION_CONTROL_CURVE,
+                                                                           Constants.DRIVE_THROTTLE_INPUT_CURVE,
+                                                                           Constants.DRIVE_TURN_INPUT_CURVE);
 
   private static final XboxController PRIMARY_CONTROLLER = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
 
@@ -36,7 +43,7 @@ public class RobotContainer {
 
     DRIVE_SUBSYSTEM.setDefaultCommand(
       new RunCommand(
-        () -> DRIVE_SUBSYSTEM.teleop(PRIMARY_CONTROLLER.getLeftY(), 0.0, PRIMARY_CONTROLLER.getRightX()), 
+        () -> DRIVE_SUBSYSTEM.teleopPID(-PRIMARY_CONTROLLER.getLeftY(), PRIMARY_CONTROLLER.getRightX()), 
         DRIVE_SUBSYSTEM
       )
     );
